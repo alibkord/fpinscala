@@ -98,20 +98,30 @@ object List {
 
   def reverse[A](l: List[A]): List[A] = foldLeft(l, Nil: List[A])((x, y) => Cons(y, x))
 
-  def foldLeft2[A, B](as: List[A], z: B)(f: (B, A) => B): B = foldRight(as, z)((x, y) => f(y, x))
+  def foldLeft2[A, B](l: List[A], z: B)(f: (B, A) => B): B = foldRight(reverse(l), z)((x, y) => f(y, x))
 
   def sumLeft2(l: List[Int]): Int = foldLeft2(l, 0)((x, y) => x + y)
 
-  def foldRight2[A, B](l: List[A], z: B)(f: (B, A) => B): B = foldRight(l, z)((x, y) => f(y, x))
+  def foldRight2[A, B](l: List[A], z: B)(f: (A, B) => B): B = foldLeft(reverse(l), z)((x, y) => f(y, x))
 
   def appendRight[A](l1: List[A], l2: List[A]): List[A] = l1 match {
     case Nil => l2
     case Cons(x, xs) => foldRight(l1, l2)((x, y) => Cons(x, y))
   }
 
+  def appendRight2[A](l1: List[A], l2: List[A]): List[A] = l1 match {
+    case Nil => l2
+    case Cons(x, xs) => foldRight2(l1, l2)((x, y) => Cons(x, y))
+  }
+
   def appendLeft[A](l1: List[A], l2: List[A]): List[A] = l1 match {
     case Nil => l2
     case Cons(x, xs) => foldLeft(reverse(l1), l2)((y, x) => Cons(x, y))
+  }
+
+  def appendLeft2[A](l1: List[A], l2: List[A]): List[A] = l1 match {
+    case Nil => l2
+    case Cons(x, xs) => foldLeft2(reverse(l1), l2)((y, x) => Cons(x, y))
   }
 
   def incrementList(ints: List[Int]): List[Int] = ints match {
@@ -151,7 +161,7 @@ object List {
     }
   }
 
-  def zipWith[A](l1: List[A], l2: List[A])(f: (A,A) => A): List[A] = l1 match {
+  def zipWith[A](l1: List[A], l2: List[A])(f: (A, A) => A): List[A] = l1 match {
     case Nil => l2
     case Cons(x, xs) => l2 match {
       case Nil => l1
@@ -161,11 +171,11 @@ object List {
 
   def zipWithTailRec[A](l1: List[A], l2: List[A])(f: (A, A) => A): List[A] = {
     @tailrec
-    def go(ll1: List[A], ll2: List[A], curr: List[A])(f: (A,A) => A): List[A] = ll1 match {
+    def go(ll1: List[A], ll2: List[A], curr: List[A])(f: (A, A) => A): List[A] = ll1 match {
       case Nil => append(reverse(curr), ll2)
       case Cons(x, xs) => ll2 match {
         case Nil => append(reverse(curr), ll1)
-        case Cons(y, ys) => go(xs, ys, Cons(f(x,y), curr))(f)
+        case Cons(y, ys) => go(xs, ys, Cons(f(x, y), curr))(f)
       }
     }
 
@@ -205,10 +215,12 @@ object Runner {
     //    println(List.reverse(l1))
 
     //    val l3 = List(9, 10, 11)
-    //
-    //    println(List.append(l1, l3))
-    //    println(List.appendRight(l1, l3))
-    //    println(List.appendLeft(l1, l3))
+
+    //        println(List.append(l1, l3))
+    //        println(List.appendRight(l1, l3))
+    //        println(List.appendRight2(l1, l3))
+    //        println(List.appendLeft(l1, l3))
+    //        println(List.appendLeft2(l1, l3))
 
     //    println(List.incrementList(l1))
     //    println(List.incrementListLeft(l1))
@@ -221,11 +233,11 @@ object Runner {
 
     //    println(List.flatMap(l1)(x => List(x,x)))
 
-    println(List.zipWithInt(l1,l3))
-    println(List.zipWithInt(l3,l1))
-    println(List.zipWith(l1,l3)((x,y)=>x+y))
-    println(List.zipWith(l3,l1)((x,y)=>x+y))
-    println(List.zipWithTailRec(l1,l3)((x,y)=>x+y))
-    println(List.zipWithTailRec(l3,l1)((x,y)=>x+y))
+    //    println(List.zipWithInt(l1,l3))
+    //    println(List.zipWithInt(l3,l1))
+    //    println(List.zipWith(l1,l3)((x,y)=>x+y))
+    //    println(List.zipWith(l3,l1)((x,y)=>x+y))
+    //    println(List.zipWithTailRec(l1,l3)((x,y)=>x+y))
+    //    println(List.zipWithTailRec(l3,l1)((x,y)=>x+y))
   }
 }
