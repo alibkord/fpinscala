@@ -159,13 +159,17 @@ object List {
     }
   }
 
-  @tailrec
-  def zipWithTailRec[A](l1: List[A], l2: List[A], curr: List[A])(f: (A, A) => A): List[A] = l1 match {
-    case Nil => append(reverse(curr), l2)
-    case Cons(x, xs) => l2 match {
-      case Nil => append(reverse(curr), l1)
-      case Cons(y, ys) => zipWithTailRec(xs, ys, Cons(f(x,y), curr))(f)
+  def zipWithTailRec[A](l1: List[A], l2: List[A])(f: (A, A) => A): List[A] = {
+    @tailrec
+    def go(ll1: List[A], ll2: List[A], curr: List[A])(f: (A,A) => A): List[A] = ll1 match {
+      case Nil => append(reverse(curr), ll2)
+      case Cons(x, xs) => ll2 match {
+        case Nil => append(reverse(curr), ll1)
+        case Cons(y, ys) => go(xs, ys, Cons(f(x,y), curr))(f)
+      }
     }
+
+    go(l1, l2, Nil)(f)
   }
 
 }
@@ -221,7 +225,7 @@ object Runner {
     println(List.zipWithInt(l3,l1))
     println(List.zipWith(l1,l3)((x,y)=>x+y))
     println(List.zipWith(l3,l1)((x,y)=>x+y))
-    println(List.zipWithTailRec(l1,l3, Nil)((x,y)=>x+y))
-    println(List.zipWithTailRec(l3,l1, Nil)((x,y)=>x+y))
+    println(List.zipWithTailRec(l1,l3)((x,y)=>x+y))
+    println(List.zipWithTailRec(l3,l1)((x,y)=>x+y))
   }
 }
