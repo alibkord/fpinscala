@@ -49,14 +49,16 @@ object Option {
     a.flatMap(x => b.map(y => f(x,y)))
   }
 
-  def sequence[A](a: List[Option[A]]): Option[List[A]] =
-    a.flatMap(o => o.getOrElse(None))
+  def sequence[A](options: List[Option[A]]): Option[List[A]] =
+    options.reverse.foldLeft(Some(Nil): Option[List[A]])((optionOfList, optionOfA) =>
+      optionOfA.flatMap(a => optionOfList.flatMap(as => Some(a :: as))))
 
   def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = ???
 }
 
 object OptionRunner {
   def main(args: Array[String]): Unit = {
-    println("hello")
+    val options: List[Option[Int]] = List(Some(1), Some(2), Some(3), Some(4), Some(5))
+    System.out.println(Option.sequence(options))
   }
 }
