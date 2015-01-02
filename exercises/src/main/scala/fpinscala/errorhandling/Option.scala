@@ -70,12 +70,21 @@ object Option {
     options.reverse.foldLeft(Some(Nil): Option[List[A]])((optionOfList, optionOfA) =>
       optionOfA.flatMap(a => optionOfList.flatMap(as => Some(a :: as))))
 
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = ???
+  def traverse[A,B](as: List[A])(f: A => Option[B]): Option[List[B]] =
+    as.reverse.foldLeft(Some(Nil): Option[List[B]])((optionOfList: Option[List[B]], a: A) =>
+      f(a).flatMap(b => optionOfList.flatMap(bs => Some(b :: bs))))
+
+  def sequence2[A](options: List[Option[A]]): Option[List[A]] =
+    traverse(options)(a => a)
 }
 
 object OptionRunner {
   def main(args: Array[String]): Unit = {
     val options: List[Option[Int]] = List(Some(1), Some(2), Some(3), Some(4), Some(5))
-    System.out.println(Option.sequence(options))
+//    System.out.println(Option.sequence(options))
+//    System.out.println(Option.sequence2(options))
+
+//    val numbers = List(1,2,3,4,5,6)
+//    System.out.println(Option.traverse(numbers)(i => Some("number " + i)))
   }
 }
