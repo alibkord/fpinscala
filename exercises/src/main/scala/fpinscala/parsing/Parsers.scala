@@ -1,9 +1,11 @@
 package fpinscala.parsing
 
+import fpinscala.parsing.JSON.{JNumber, JObject, JString}
+
 import language.higherKinds
 import scala.util.matching.Regex
 
-trait Parsers[Parser[+_]] { self =>
+trait Parsers[ParseError, Parser[+_]] { self =>
 
   // Primitives:
 
@@ -12,12 +14,26 @@ trait Parsers[Parser[+_]] { self =>
   def slice[A](p: Parser[A]): Parser[String]
   def flatMap[A,B](p: Parser[A])(f: A => Parser[B]): Parser[B]
 
-  // Implicit Converters
+  def alpha: Parser[Char] = "[a-z|A-Z]".r.p
+  def digit: Parser[Char] = "[0-9]".r.p
+  def whitespace: Parser[Char] = " " | "\n" | "\t" | "\r"
+  def dot: Parser[Char] = '.'
+  def startCurlyBracket: Parser[Char] = '{'
+  def endCurlyBracket: Parser[Char] = '}'
+  def startSquareBracket: Parser[Char] = '['
+  def endSquareBracket: Parser[Char] = ']'
+  def comma: Parser[Char] = ','
+  def colon: Parser[Char] = ':'
 
-  implicit def regex(r: Regex): Parser[String]
   implicit def string(s: String): Parser[String]
+  implicit def char(c: Char): Parser[Char] = c.toString.p
+  implicit def regex(r: Regex): Parser[String]
+
+  // Converters
+
   implicit def operators[A](p: Parser[A]) = ParserOps(p)
   implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] = ParserOps(f(a))
+  implicit def asCharParser(p: Parser[String]): Parser[Char] = p.map(_.head)
 
   // Combinators
 
@@ -75,4 +91,26 @@ case class Location(input: String, offset: Int = 0) {
 
 case class ParseError(stack: List[(Location,String)] = List(),
                       otherFailures: List[ParseError] = List()) {
+}
+
+object JsonParser {
+  def jsonParser[Err, Parser[+_]](P: Parsers[Err, Parser]): Parser[JSON] = {
+    import P._
+    import JSON._
+    def objectParser: Parser[JObject] = ???
+    def numParser: Parser[JNumber] = ???
+    def nullParser: Parser[JSON] = ???
+    def strParser: Parser[String] = ???
+    def alpha: Parser[Char] = ???
+  }
+}
+
+trait JSON
+object JSON {
+  case object JNull extends JSON
+  case class JNumber(get: Double) extends JSON
+  case class JString(get: String) extends JSON
+  case class JBool(get: Boolean) extends JSON
+  case class JArray(get: IndexedSeq[JSON]) extends JSON
+  case class JObject(get: Map[String, JSON]) extends JSON
 }
